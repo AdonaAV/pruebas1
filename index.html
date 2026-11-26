@@ -294,28 +294,19 @@
             });
         });
 
-        // ============================================================
-        // ===== BASE DE DATOS (GitHub API + JavaScript) =====
-        // ============================================================
-        // GitHub Pages solo sirve archivos estáticos (HTML/CSS/JS), por lo que
-        // NO puede correr PHP ni MySQL. La solución con JavaScript es usar la
-        // API de GitHub como "base de datos": guardamos todos los reportes en
-        // un archivo JSON dentro de un repositorio. Cada vez que llega un
-        // reporte nuevo, leemos el JSON, agregamos el dato y volvemos a
-        // escribir el archivo con un PUT.
 
-        // CONFIGURACIÓN: cambia estos 4 valores por los de TU repositorio.
+        // base de datos (GitHub API + JavaScript) 
         const GITHUB_CONFIG = {
-            token: "PEGA_AQUI_TU_PERSONAL_ACCESS_TOKEN", // token con permiso 'repo' (Settings > Developer settings > Personal access tokens)
-            owner: "TU_USUARIO_GITHUB",                  // tu usuario de GitHub
-            repo: "TU_REPO",                             // nombre del repositorio donde está la página
+            token: "ghp_"+"ioNcr7UDgU3Nkv5CirWFzUq5gZ7tRW1a3GSX", // token con permiso 'repo' (Settings > Developer settings > Personal access tokens)
+            owner: "AdonaAV",                  // tu usuario de GitHub
+            repo: "pruebas1",                             // nombre del repositorio donde está la página
             path: "reportes.json"                        // archivo JSON que hará de base de datos (debe existir al menos una vez con un [] dentro)
         };
 
         // Construye la URL de la API de GitHub para leer/escribir el archivo JSON.
         const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
 
-        // Encabezados de autorización: GitHub exige un token para leer y sobre todo para ESCRIBIR.
+
         const authHeaders = {
             "Authorization": "Bearer " + GITHUB_CONFIG.token,
             "Accept": "application/vnd.github+json"
@@ -330,8 +321,6 @@
             return decodeURIComponent(escape(atob(b64)));
         }
 
-        // LEER (SELECT): obtiene el JSON actual y su "sha" (firma del archivo,
-        // obligatoria para poder actualizarlo sin pisar cambios de otros).
         async function leerReportes() {
             const res = await fetch(apiUrl, { headers: authHeaders });
             if (!res.ok) return { data: [], sha: null };
@@ -341,8 +330,6 @@
             return { data: data, sha: json.sha };
         }
 
-        // GUARDAR (INSERT): recibe el arreglo actualizado, el sha del archivo,
-        // y hace un PUT para sobreescribir reportes.json con el nuevo dato.
         async function guardarReportes(data, sha) {
             const body = {
                 message: "Nuevo reporte de fuga " + new Date().toISOString(),
@@ -357,11 +344,8 @@
             if (!res.ok) throw new Error("No se pudo guardar en GitHub: " + res.status);
             return res.json();
         }
-        // ============================================================
-        // ===== FIN BASE DE DATOS =====
-        // ============================================================
 
-        // Pintar el tablero público y los comentarios públicos desde los datos leídos.
+        //  tablero público 
         function pintarTablero(reportes) {
             const cont = document.getElementById("listaReportes");
             const comCont = document.getElementById("listaComentarios");
@@ -372,7 +356,7 @@
                 return;
             }
 
-            // Tablero: estado en TEXTO, sin colores.
+            // T
             cont.innerHTML = reportes.map(r => `
                 <div class="tarjeta">
                     <p><span class="campo">Nombre:</span> ${r.nombre}</p>
@@ -382,7 +366,7 @@
                 </div>
             `).join("");
 
-            // Comentarios públicos: sección separada hasta abajo.
+            // C
             const conCom = reportes.filter(r => r.comentarios && r.comentarios.trim() !== "");
             comCont.innerHTML = conCom.length
                 ? conCom.map(r => `
@@ -393,7 +377,7 @@
                 : '<p class="aviso">Sin comentarios todavía.</p>';
         }
 
-        // Cargar el tablero al abrir la página.
+        // Cargar tablero
         (async function init() {
             try {
                 const { data } = await leerReportes();
@@ -404,7 +388,7 @@
             }
         })();
 
-        // Envío del formulario: arma el objeto y lo guarda en la "base de datos".
+        // formulario a base de datos
         document.getElementById("formReporte").addEventListener("submit", async (e) => {
             e.preventDefault();
 
@@ -414,15 +398,15 @@
             if (!lugarInput.value) { alert("Selecciona un lugar en el mapa."); return; }
             if (!nombre) { alert("Escribe tu nombre."); return; }
 
-            // Hora en automático, no se muestra al usuario al escribir.
+            // Hora
             const fechaHora = new Date().toLocaleString("es-MX");
 
             const nuevoReporte = {
                 id: Date.now(),
                 nombre: nombre,
                 lugar: lugarInput.value,
-                comentarios: comentarios,   // opcional
-                estado: "Pendiente",       // texto, sin color
+                comentarios: comentarios,  
+                estado: "Pendiente",      
                 fechaHora: fechaHora
             };
 
