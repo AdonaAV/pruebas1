@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Fugas de Agua</title>
+    <style>
+        body {
+            background-color: rgb(0, 0, 0);
+            color: rgb(255, 255, 255);
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            padding: 20px 40px;
+            background-color: rgb(10, 10, 10);
+        }
+
+        .logo {
+            width: 70px;
+            height: 70px;
+            margin-right: 20px;
+        }
+
+        .logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+        }
+
+        .system-name h1 {
+            font-size: 24px;
+            color: rgb(255, 255, 255);
+        }
+
+        main {
+            padding: 30px 40px;
+        }
+
+        .section-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+            color: rgb(255, 255, 255);
+        }
+
+        .map-wrapper {
+            width: 800px;
+            max-width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .map-container {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: rgb(26, 26, 26);
+        }
+
+        .map-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        .punto {
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            background-color: rgb(255, 42, 42);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+        }
+
+        .punto.seleccionado {
+            background-color: rgb(255, 255, 255);
+        }
+
+        .etiqueta {
+            position: absolute;
+            transform: translate(-50%, -100%);
+            background-color: rgba(0, 0, 0, 0.85);
+            color: rgb(255, 255, 255);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+            white-space: nowrap;
+            pointer-events: none;
+            opacity: 0;
+            top: -18px;
+            z-index: 3;
+        }
+
+        .punto.seleccionado .etiqueta {
+            opacity: 1;
+        }
+
+        .lugar-seleccionado {
+            margin-top: 10px;
+            font-size: 15px;
+            color: rgb(255, 255, 255);
+        }
+
+        .lugar-seleccionado span {
+            font-weight: bold;
+            color: rgb(255, 255, 255);
+        }
+
+        .form-section {
+            margin-top: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: rgb(255, 255, 255);
+            font-weight: bold;
+        }
+
+        .form-group input[type="text"],
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            background-color: rgb(26, 26, 26);
+            border: 1px solid rgb(51, 51, 51);
+            border-radius: 6px;
+            color: rgb(255, 255, 255);
+            font-size: 14px;
+        }
+
+        .form-group input[type="text"]:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: rgb(255, 255, 255);
+        }
+
+        .btn-submit {
+            background-color: rgb(30, 144, 255);
+            color: rgb(255, 255, 255);
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background-color: rgb(24, 118, 208);
+        }
+
+        .tablero {
+            margin-top: 40px;
+            border-top: 1px solid rgb(51, 51, 51);
+            padding-top: 20px;
+        }
+
+        .tarjeta {
+            background-color: rgb(26, 26, 26);
+            border: 1px solid rgb(51, 51, 51);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 12px;
+        }
+
+        .tarjeta p {
+            margin: 4px 0;
+            font-size: 14px;
+        }
+
+        .tarjeta .campo {
+            font-weight: bold;
+        }
+
+        .comentarios-publicos {
+            margin-top: 40px;
+            border-top: 1px solid rgb(51, 51, 51);
+            padding-top: 20px;
+        }
+
+        .comentario-item {
+            background-color: rgb(26, 26, 26);
+            border-left: 3px solid rgb(51, 51, 51);
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+
+        .aviso {
+            color: rgb(150, 150, 150);
+            font-style: italic;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <img src="logoC.png" alt="Logo">
+        </div>
+        <div class="system-name">
+            <h1>Sistema de Reportes</h1>
+        </div>
+    </header>
+
+    <main>
+        <h2 class="section-title">Marca la ubicacion de la fuga</h2>
+
+        <div class="map-wrapper">
+            <div class="map-container" id="mapa">
+                <img src="mapaB.png" alt="Mapa" draggable="false">
+
+                <div class="punto" data-lugar="Baños cerca de la cancha" style="top: 70%; left: 26%;">
+                    <div class="etiqueta">Baños cerca de la cancha</div>
+                </div>
+
+                <div class="punto" data-lugar="Baños audivisual" style="top: 65%; left: 95%;">
+                    <div class="etiqueta">Baños audivisual</div>
+                </div>
+
+                <div class="punto" data-lugar="Tinacos" style="top: 26%; left: 68%;">
+                    <div class="etiqueta">Tinacos</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="lugar-seleccionado">
+            Lugar seleccionado: <span id="lugarTexto">Ninguno</span>
+        </div>
+
+        <div class="form-section">
+            <form id="formReporte" novalidate>
+                <input type="hidden" id="lugarInput" name="lugar">
+
+                <div class="form-group">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="comentarios">Comentarios (opcional):</label>
+                    <textarea id="comentarios" name="comentarios" rows="4" placeholder="Detalles adicionales..."></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit">Mandar</button>
+            </form>
+        </div>
+
+        <div class="tablero">
+            <h2 class="section-title">Tablero público de reportes</h2>
+            <div id="listaReportes">
+                <p class="aviso">Cargando reportes...</p>
+            </div>
+        </div>
+
+        <div class="comentarios-publicos">
+            <h2 class="section-title">Comentarios públicos</h2>
+            <div id="listaComentarios">
+                <p class="aviso">Sin comentarios todavía.</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const puntos = document.querySelectorAll('.punto');
+        const lugarTexto = document.getElementById('lugarTexto');
+        const lugarInput = document.getElementById('lugarInput');
+
+        puntos.forEach(punto => {
+            punto.addEventListener('click', () => {
+                puntos.forEach(p => p.classList.remove('seleccionado'));
+                punto.classList.add('seleccionado');
+                const lugar = punto.getAttribute('data-lugar');
+                lugarTexto.textContent = lugar;
+                lugarInput.value = lugar;
+            });
+        });
+
+        // ============================================================
+        // ===== BASE DE DATOS (GitHub API + JavaScript) =====
+        // ============================================================
+        // GitHub Pages solo sirve archivos estáticos (HTML/CSS/JS), por lo que
+        // NO puede correr PHP ni MySQL. La solución con JavaScript es usar la
+        // API de GitHub como "base de datos": guardamos todos los reportes en
+        // un archivo JSON dentro de un repositorio. Cada vez que llega un
+        // reporte nuevo, leemos el JSON, agregamos el dato y volvemos a
+        // escribir el archivo con un PUT.
+
+        // CONFIGURACIÓN: cambia estos 4 valores por los de TU repositorio.
+        const GITHUB_CONFIG = {
+            token: "PEGA_AQUI_TU_PERSONAL_ACCESS_TOKEN", // token con permiso 'repo' (Settings > Developer settings > Personal access tokens)
+            owner: "TU_USUARIO_GITHUB",                  // tu usuario de GitHub
+            repo: "TU_REPO",                             // nombre del repositorio donde está la página
+            path: "reportes.json"                        // archivo JSON que hará de base de datos (debe existir al menos una vez con un [] dentro)
+        };
+
+        // Construye la URL de la API de GitHub para leer/escribir el archivo JSON.
+        const apiUrl = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
+
+        // Encabezados de autorización: GitHub exige un token para leer y sobre todo para ESCRIBIR.
+        const authHeaders = {
+            "Authorization": "Bearer " + GITHUB_CONFIG.token,
+            "Accept": "application/vnd.github+json"
+        };
+
+        // Helpers para convertir texto con acentos (ñ, á, etc.) a base64 y viceversa,
+        // porque la API de GitHub guarda el contenido del archivo en base64.
+        function toBase64(str) {
+            return btoa(unescape(encodeURIComponent(str)));
+        }
+        function fromBase64(b64) {
+            return decodeURIComponent(escape(atob(b64)));
+        }
+
+        // LEER (SELECT): obtiene el JSON actual y su "sha" (firma del archivo,
+        // obligatoria para poder actualizarlo sin pisar cambios de otros).
+        async function leerReportes() {
+            const res = await fetch(apiUrl, { headers: authHeaders });
+            if (!res.ok) return { data: [], sha: null };
+            const json = await res.json();
+            // El contenido viene en base64; lo decodificamos y parseamos a arreglo.
+            const data = json.content ? JSON.parse(fromBase64(json.content)) : [];
+            return { data: data, sha: json.sha };
+        }
+
+        // GUARDAR (INSERT): recibe el arreglo actualizado, el sha del archivo,
+        // y hace un PUT para sobreescribir reportes.json con el nuevo dato.
+        async function guardarReportes(data, sha) {
+            const body = {
+                message: "Nuevo reporte de fuga " + new Date().toISOString(),
+                content: toBase64(JSON.stringify(data, null, 2)),
+                sha: sha
+            };
+            const res = await fetch(apiUrl, {
+                method: "PUT",
+                headers: authHeaders,
+                body: JSON.stringify(body)
+            });
+            if (!res.ok) throw new Error("No se pudo guardar en GitHub: " + res.status);
+            return res.json();
+        }
+        // ============================================================
+        // ===== FIN BASE DE DATOS =====
+        // ============================================================
+
+        // Pintar el tablero público y los comentarios públicos desde los datos leídos.
+        function pintarTablero(reportes) {
+            const cont = document.getElementById("listaReportes");
+            const comCont = document.getElementById("listaComentarios");
+
+            if (reportes.length === 0) {
+                cont.innerHTML = '<p class="aviso">No hay reportes todavía.</p>';
+                comCont.innerHTML = '<p class="aviso">Sin comentarios todavía.</p>';
+                return;
+            }
+
+            // Tablero: estado en TEXTO, sin colores.
+            cont.innerHTML = reportes.map(r => `
+                <div class="tarjeta">
+                    <p><span class="campo">Nombre:</span> ${r.nombre}</p>
+                    <p><span class="campo">Lugar:</span> ${r.lugar}</p>
+                    <p><span class="campo">Hora:</span> ${r.fechaHora}</p>
+                    <p><span class="campo">Estado:</span> ${r.estado}</p>
+                </div>
+            `).join("");
+
+            // Comentarios públicos: sección separada hasta abajo.
+            const conCom = reportes.filter(r => r.comentarios && r.comentarios.trim() !== "");
+            comCont.innerHTML = conCom.length
+                ? conCom.map(r => `
+                    <div class="comentario-item">
+                        <strong>${r.nombre}</strong> (${r.lugar}): ${r.comentarios}
+                    </div>
+                `).join("")
+                : '<p class="aviso">Sin comentarios todavía.</p>';
+        }
+
+        // Cargar el tablero al abrir la página.
+        (async function init() {
+            try {
+                const { data } = await leerReportes();
+                pintarTablero(data);
+            } catch (e) {
+                document.getElementById("listaReportes").innerHTML =
+                    '<p class="aviso">Error al cargar. Revisa la configuración de GitHub.</p>';
+            }
+        })();
+
+        // Envío del formulario: arma el objeto y lo guarda en la "base de datos".
+        document.getElementById("formReporte").addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const nombre = document.getElementById("nombre").value.trim();
+            const comentarios = document.getElementById("comentarios").value.trim();
+
+            if (!lugarInput.value) { alert("Selecciona un lugar en el mapa."); return; }
+            if (!nombre) { alert("Escribe tu nombre."); return; }
+
+            // Hora en automático, no se muestra al usuario al escribir.
+            const fechaHora = new Date().toLocaleString("es-MX");
+
+            const nuevoReporte = {
+                id: Date.now(),
+                nombre: nombre,
+                lugar: lugarInput.value,
+                comentarios: comentarios,   // opcional
+                estado: "Pendiente",       // texto, sin color
+                fechaHora: fechaHora
+            };
+
+            try {
+                const { data, sha } = await leerReportes();
+                data.unshift(nuevoReporte);
+                await guardarReportes(data, sha);
+                pintarTablero(data);
+                alert("Reporte enviado.");
+                e.target.reset();
+                lugarInput.value = "";
+                lugarTexto.textContent = "Ninguno";
+                puntos.forEach(p => p.classList.remove("seleccionado"));
+            } catch (err) {
+                alert("No se pudo guardar: " + err.message);
+            }
+        });
+    </script>
+
+</body>
+</html>
