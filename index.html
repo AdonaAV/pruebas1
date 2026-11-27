@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reporte de Fugas de Agua</title>
+    <title>Reportes de Fugas</title>
     <style>
         body {
             background-color: rgb(0, 0, 0);
@@ -217,33 +217,45 @@
             <img src="logoC.png" alt="Logo">
         </div>
         <div class="system-name">
-            <h1>Sistema de Reportes</h1>
+            <h1>Reportes de Fugas</h1>
         </div>
     </header>
 
     <main>
-        <h2 class="section-title">Marca la ubicacion de la fuga</h2>
+        <h2 class="section-title">Selecciona el lugar</h2>
 
         <div class="map-wrapper">
             <div class="map-container" id="mapa">
                 <img src="mapaB.png" alt="Mapa" draggable="false">
 
-                <div class="punto" data-lugar="Baños cerca de la cancha" style="top: 70%; left: 26%;">
-                    <div class="etiqueta">Baños cerca de la cancha</div>
+                <div class="punto" data-lugar="Baños Cancha" style="top: 67%; left: 26%;">
+                    <div class="etiqueta">Baños Cancha</div>
                 </div>
 
-                <div class="punto" data-lugar="Baños audivisual" style="top: 65%; left: 95%;">
-                    <div class="etiqueta">Baños audivisual</div>
+                <div class="punto" data-lugar="Baños Audiovisual" style="top: 64%; left: 92%;">
+                    <div class="etiqueta">Baños Audiovisual</div>
                 </div>
 
-                <div class="punto" data-lugar="Tinacos" style="top: 26%; left: 68%;">
+                <div class="punto" data-lugar="Tinacos" style="top: 24%; left: 68%;">
                     <div class="etiqueta">Tinacos</div>
+                </div>
+
+                <div class="punto" data-lugar="Baños Direccion" style="top: 3%; left: 35%;">
+                    <div class="etiqueta">Baños Direcion</div>
+                </div>
+
+                <div class="punto" data-lugar="Llave del jardin" style="top: 40%; left: 55%;">
+                    <div class="etiqueta">Llave del jardin</div>
+                </div>
+
+                <div class="punto" data-lugar="Laboratorio" style="top: 20%; left: 25%;">
+                    <div class="etiqueta">Laboratorio</div>
                 </div>
             </div>
         </div>
 
         <div class="lugar-seleccionado">
-            Lugar seleccionado: <span id="lugarTexto">Ninguno</span>
+            Lugar: <span id="lugarTexto">Ninguno</span>
         </div>
 
         <div class="form-section">
@@ -256,25 +268,23 @@
                 </div>
 
                 <div class="form-group">
-                    <label for="comentarios">Comentarios (opcional):</label>
-                    <textarea id="comentarios" name="comentarios" rows="4" placeholder="Detalles adicionales..."></textarea>
+                    <label for="comentarios">Comentarios:</label>
+                    <textarea id="comentarios" name="comentarios" rows="4" placeholder="Detalles..."></textarea>
                 </div>
 
-                <button type="submit" class="btn-submit">Mandar</button>
+                <button type="submit" class="btn-submit">Enviar</button>
             </form>
         </div>
 
         <div class="tablero">
-            <h2 class="section-title">Tablero público de reportes</h2>
+            <h2 class="section-title">Reportes</h2>
             <div id="listaReportes">
-                <p class="aviso">Cargando reportes...</p>
             </div>
         </div>
 
         <div class="comentarios-publicos">
-            <h2 class="section-title">Comentarios públicos</h2>
+            <h2 class="section-title">Comentarios</h2>
             <div id="listaComentarios">
-                <p class="aviso">Sin comentarios todavía.</p>
             </div>
         </div>
     </main>
